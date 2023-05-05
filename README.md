@@ -5,6 +5,7 @@
 ## Install - (full mne required because of 3D viz)
 ```
 mamba create -n megDash --channel=conda-forge mne pip pandas statsmodels 
+conda activate megDash
 mamba install -c conda-forge shiny
 ```
 
