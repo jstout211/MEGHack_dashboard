@@ -6,7 +6,7 @@
 ```
 mamba create --override-channels --channel=conda-forge --name=megDash mne -y  
 conda activate megDash
-mamba install --channel=conda-forge pip pandas statsmodels shiny
+mamba install -n megDash --override-channels  -c conda-forge statsmodels shiny
 ```
 
 ## Test data
