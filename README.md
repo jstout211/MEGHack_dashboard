@@ -4,9 +4,9 @@
 
 ## Install - (full mne required because of 3D viz)
 ```
-mamba create -n megDash --channel=conda-forge mne pip pandas statsmodels 
+mamba create --override-channels --channel=conda-forge --name=megDash mne -y  
 conda activate megDash
-mamba install -c conda-forge shiny
+mamba install --channel=conda-forge pip pandas statsmodels shiny
 ```
 
 ## Test data
