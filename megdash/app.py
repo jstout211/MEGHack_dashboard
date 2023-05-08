@@ -6,10 +6,14 @@ from matplotlib import pyplot as plt
 import statsmodels.formula.api as smf
 from io import StringIO
 from pathlib import Path
+import os, os.path as op
+
+import megdash
+data_path = op.join(megdash.__path__[0], 'data/TESTDATA.csv')
 
 sns.set_theme()
 
-data = pd.read_csv('/Users/arshithab/Desktop/OneDesk/Projects/MEGDash/MEGHack_dashboard/data/TESTDATA.csv')
+data = pd.read_csv(data_path)
 
 options_group = data["group"].unique().tolist()
 options_parcel = data["Parcel"].unique().tolist()
@@ -24,7 +28,7 @@ app_ui = ui.page_fluid(
             # ui.input_slider("max_age", "Maximum Age", 0, 114, 80),
         ),
         ui.panel_main(
-            ui.output_text("proc_parcel_regression"),
+            ui.output_ui("proc_parcel_regression"), #, class_="display-3 text-center"),
             ui.output_plot("a_scatter_plot"),
             ui.output_table("show_table"),
         ),
@@ -58,20 +62,21 @@ def server(input, output, session):
         subj_ct = data.groupby(['group']).get_group(int(input.group())).nunique().subject
         return subj_ct
 
-    @reactive.Calc
+    @output
+    @render.ui
     def proc_parcel_regression():
         '''Takes merged dataframe (subj_vars + parcel data)
         and performs regression of variables using statsmodels'''
         df = subset_df()
         results = smf.ols('Delta ~ age', data=df).fit()
 
-        return results.summary()
+        return ui.HTML(results.summary().as_html())
 
     @output
     @render.table
     def show_table():
         df = subset_df()
-        return df
+        return df.head()
 
     @output
     @render.plot(alt="Scatter Plot: Age vs Delta")
