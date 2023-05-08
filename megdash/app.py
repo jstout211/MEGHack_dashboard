@@ -17,6 +17,7 @@ data = pd.read_csv(data_path)
 
 options_group = data["group"].unique().tolist()
 options_parcel = data["Parcel"].unique().tolist()
+options_freq = ['Delta','Theta', 'Alpha', 'Beta','L_Gamma', 'AlphaPeak']
 
 app_ui = ui.page_fluid(
     ui.panel_title("MEG Dashboard"),
@@ -24,6 +25,7 @@ app_ui = ui.page_fluid(
         ui.panel_sidebar(
             ui.input_selectize("group", "Group", options_group, multiple=False),
             ui.input_selectize("parcel", "Parcel", options_parcel, multiple=False),
+            ui.input_selectize("frequency", "Frequency", options_freq, multiple=False),
             # ui.input_slider("min_age", "Minimum Age", 0, 114, 20),
             # ui.input_slider("max_age", "Maximum Age", 0, 114, 80),
         ),
@@ -68,7 +70,7 @@ def server(input, output, session):
         '''Takes merged dataframe (subj_vars + parcel data)
         and performs regression of variables using statsmodels'''
         df = subset_df()
-        results = smf.ols('Delta ~ age', data=df).fit()
+        results = smf.ols(f'{str(input.frequency())} ~ age', data=df).fit()
 
         return ui.HTML(results.summary().as_html())
 
@@ -79,10 +81,10 @@ def server(input, output, session):
         return df.head()
 
     @output
-    @render.plot(alt="Scatter Plot: Age vs Delta")
+    @render.plot(alt=f"Scatter Plot: Age vs Frequency") 
     def a_scatter_plot():
         sub_df = subset_df()
-        return sns.regplot(data=sub_df, x='age', y='Alpha')
+        return sns.regplot(data=sub_df, x='age', y=input.frequency())
 
 
 app = App(app_ui, server)
