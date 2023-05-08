@@ -17,7 +17,9 @@ data = pd.read_csv(data_path)
 
 options_group = data["group"].unique().tolist()
 options_parcel = data["Parcel"].unique().tolist()
-options_freq = ['Delta','Theta', 'Alpha', 'Beta','L_Gamma', 'AlphaPeak']
+options_freq = ['Delta','Theta', 'Alpha', 'Beta','L_Gamma', 'All_Frequency', 'AlphaPeak']
+#For multi view plotting
+just_freqs = ['Delta','Theta', 'Alpha', 'Beta','L_Gamma']
 
 app_ui = ui.page_fluid(
     ui.panel_title("MEG Dashboard"),
@@ -70,9 +72,11 @@ def server(input, output, session):
         '''Takes merged dataframe (subj_vars + parcel data)
         and performs regression of variables using statsmodels'''
         df = subset_df()
-        results = smf.ols(f'{str(input.frequency())} ~ age', data=df).fit()
-
-        return ui.HTML(results.summary().as_html())
+        if input.frequency()=='All_Frequency':
+            return ui.HTML('')
+        else:
+            results = smf.ols(f'{str(input.frequency())} ~ age', data=df).fit()
+            return ui.HTML(results.summary().as_html())
 
     @output
     @render.table
@@ -84,7 +88,11 @@ def server(input, output, session):
     @render.plot(alt=f"Scatter Plot: Age vs Frequency") 
     def a_scatter_plot():
         sub_df = subset_df()
-        return sns.regplot(data=sub_df, x='age', y=input.frequency())
+        if input.frequency()=='All_Frequency':
+            tmp = pd.melt(sub_df, id_vars='age', value_vars=just_freqs)
+            sns.lmplot(data=tmp, x='age', y='value', hue='variable') 
+        else:    
+            return sns.regplot(data=sub_df, x='age', y=input.frequency())
 
 
 app = App(app_ui, server)
